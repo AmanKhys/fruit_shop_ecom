@@ -9,6 +9,33 @@ import (
 	"context"
 )
 
+const createAdminUser = `-- name: CreateAdminUser :one
+insert into users(email, password, role)
+select ?, ?, 'admin'
+where not exists (
+  select 1 from users where role = 'admin'
+)
+returning id, email, role
+`
+
+type CreateAdminUserParams struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type CreateAdminUserRow struct {
+	ID    int64  `json:"id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+func (q *Queries) CreateAdminUser(ctx context.Context, db DBTX, arg CreateAdminUserParams) (CreateAdminUserRow, error) {
+	row := db.QueryRowContext(ctx, createAdminUser, arg.Email, arg.Password)
+	var i CreateAdminUserRow
+	err := row.Scan(&i.ID, &i.Email, &i.Role)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 insert into users (email, password)
 values (?, ?)

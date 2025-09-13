@@ -10,6 +10,7 @@ import (
 type UserUsecase interface {
 	Register(ctx context.Context, email, pasword string) (domain.User, error)
 	Login(ctx context.Context, email, password string) (domain.User, error)
+	EnsureAdminExists(ctx context.Context, email, password string) (domain.User, error)
 }
 
 type userUsecase struct {
@@ -41,4 +42,9 @@ func (u *userUsecase) Login(ctx context.Context, email, password string) (domain
 		return domain.User{}, errors.New("invalid credentials")
 	}
 	return user, nil
+}
+
+func (u *userUsecase) EnsureAdminExists(ctx context.Context, email, password string) (domain.User, error) {
+	return u.repo.CreateAdminUser(ctx, domain.User{Email: email, Password: password})
+
 }

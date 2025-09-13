@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CreateAdminUser(ctx context.Context, db DBTX, arg CreateAdminUserParams) (CreateAdminUserRow, error)
 	CreateUser(ctx context.Context, db DBTX, arg CreateUserParams) (CreateUserRow, error)
 	GetUserByEmail(ctx context.Context, db DBTX, email string) (User, error)
 }

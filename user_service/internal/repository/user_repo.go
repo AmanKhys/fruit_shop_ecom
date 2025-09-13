@@ -44,3 +44,14 @@ func (r *userRepo) GetUserByEmail(ctx context.Context, email string) (domain.Use
 		Role:     u.Role,
 	}, nil
 }
+
+func (r *userRepo) CreateAdminUser(ctx context.Context, u domain.User) (domain.User, error) {
+	admin, err := r.q.CreateAdminUser(ctx, r.db, sqlc.CreateAdminUserParams{
+		Email:    u.Email,
+		Password: u.Password,
+	})
+	if err != nil {
+		return domain.User{}, err
+	}
+	return domain.User{ID: admin.ID, Email: admin.Email, Role: u.Role}, nil
+}

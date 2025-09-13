@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"user_service/internal/domain"
@@ -26,11 +27,7 @@ func (u *userUsecase) Register(ctx context.Context, email, password string) (dom
 	if err != nil {
 		return domain.User{}, err
 	}
-	user := domain.User{
-		Email:    email,
-		Password: string(hashedPassword),
-	}
-	return u.repo.CreateUser(ctx, user)
+	return u.repo.CreateUser(ctx, domain.User{Email: email, Password: string(hashedPassword)})
 }
 
 func (u *userUsecase) Login(ctx context.Context, email, password string) (domain.User, error) {
@@ -45,6 +42,16 @@ func (u *userUsecase) Login(ctx context.Context, email, password string) (domain
 }
 
 func (u *userUsecase) EnsureAdminExists(ctx context.Context, email, password string) (domain.User, error) {
-	return u.repo.CreateAdminUser(ctx, domain.User{Email: email, Password: password})
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return domain.User{}, err
+	}
 
+	admin, err := u.repo.CreateAdminUser(ctx, domain.User{Email: email, Password: string(hashedPassword)})
+	if errors.Is(err, sql.ErrNoRows) {
+		return u.repo.GetUserByEmail(ctx, email)
+	} else if err != nil {
+		return domain.User{}, err
+	}
+	return admin, err
 }

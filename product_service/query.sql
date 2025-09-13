@@ -1,7 +1,9 @@
--- name: GetAllProducts :many
+-- name: GetProducts :many
+-- go-type: min=float64
+-- go-type: max=float64
 select * from products
 where isDeleted = false;
--- name: GetFilterdProducts :many
+-- name: GetFilteredProducts :many
 select * from products
 where price >= :min 
 and price <= :max
@@ -12,7 +14,7 @@ select * from products
 where id = ?
 and isDeleted = false;
 
--- name: GetAllProductsForAdmin :many
+-- name: GetProductsForAdmin :many
 select * from products;
 
 -- name: CreateProduct :one

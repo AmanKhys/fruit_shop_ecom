@@ -55,87 +55,20 @@ func (q *Queries) DeleteProductByID(ctx context.Context, db DBTX, id int64) (Pro
 	return i, err
 }
 
-const getAllProducts = `-- name: GetAllProducts :many
-select id, name, price, stock, isdeleted from products
-where isDeleted = false
-`
-
-func (q *Queries) GetAllProducts(ctx context.Context, db DBTX) ([]Product, error) {
-	rows, err := db.QueryContext(ctx, getAllProducts)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Product
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Price,
-			&i.Stock,
-			&i.Isdeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAllProductsForAdmin = `-- name: GetAllProductsForAdmin :many
-select id, name, price, stock, isdeleted from products
-`
-
-func (q *Queries) GetAllProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error) {
-	rows, err := db.QueryContext(ctx, getAllProductsForAdmin)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Product
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Price,
-			&i.Stock,
-			&i.Isdeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getFilterdProducts = `-- name: GetFilterdProducts :many
+const getFilteredProducts = `-- name: GetFilteredProducts :many
 select id, name, price, stock, isdeleted from products
 where price >= ?1 
 and price <= ?2
 and isDeleted = false
 `
 
-type GetFilterdProductsParams struct {
+type GetFilteredProductsParams struct {
 	Min interface{} `json:"min"`
 	Max interface{} `json:"max"`
 }
 
-func (q *Queries) GetFilterdProducts(ctx context.Context, db DBTX, arg GetFilterdProductsParams) ([]Product, error) {
-	rows, err := db.QueryContext(ctx, getFilterdProducts, arg.Min, arg.Max)
+func (q *Queries) GetFilteredProducts(ctx context.Context, db DBTX, arg GetFilteredProductsParams) ([]Product, error) {
+	rows, err := db.QueryContext(ctx, getFilteredProducts, arg.Min, arg.Max)
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +113,75 @@ func (q *Queries) GetProductByID(ctx context.Context, db DBTX, id int64) (Produc
 		&i.Isdeleted,
 	)
 	return i, err
+}
+
+const getProducts = `-- name: GetProducts :many
+select id, name, price, stock, isdeleted from products
+where isDeleted = false
+`
+
+// go-type: min=float64
+// go-type: max=float64
+func (q *Queries) GetProducts(ctx context.Context, db DBTX) ([]Product, error) {
+	rows, err := db.QueryContext(ctx, getProducts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Price,
+			&i.Stock,
+			&i.Isdeleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getProductsForAdmin = `-- name: GetProductsForAdmin :many
+select id, name, price, stock, isdeleted from products
+`
+
+func (q *Queries) GetProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error) {
+	rows, err := db.QueryContext(ctx, getProductsForAdmin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Price,
+			&i.Stock,
+			&i.Isdeleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateProductByID = `-- name: UpdateProductByID :one

@@ -11,10 +11,12 @@ import (
 type Querier interface {
 	CreateProduct(ctx context.Context, db DBTX, arg CreateProductParams) (Product, error)
 	DeleteProductByID(ctx context.Context, db DBTX, id int64) (Product, error)
-	GetAllProducts(ctx context.Context, db DBTX) ([]Product, error)
-	GetAllProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error)
-	GetFilterdProducts(ctx context.Context, db DBTX, arg GetFilterdProductsParams) ([]Product, error)
+	GetFilteredProducts(ctx context.Context, db DBTX, arg GetFilteredProductsParams) ([]Product, error)
 	GetProductByID(ctx context.Context, db DBTX, id int64) (Product, error)
+	// go-type: min=float64
+	// go-type: max=float64
+	GetProducts(ctx context.Context, db DBTX) ([]Product, error)
+	GetProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error)
 	UpdateProductByID(ctx context.Context, db DBTX, arg UpdateProductByIDParams) (Product, error)
 }
 

@@ -4,6 +4,6 @@ values (?, ?)
 returning id, email;
 
 -- name: GetUserByEmail :one
-select id, email, password
+select id, email, password, role
 from users
 where email = ?;

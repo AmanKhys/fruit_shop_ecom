@@ -1,0 +1,14 @@
+version: "2"
+
+sql:
+  - engine: "sqlite"
+    schema: "schema.sql"
+    queries: "query.sql"         # or "queries/" directory if many .sql
+    gen:
+      go:
+        package: "sqlc"              # package for all generated code
+        out: "./internal/infrastructure/db/sqlc/"                  # directory for generated code
+        emit_interface: true
+        emit_json_tags: true
+        emit_pointers_for_null_types: true
+        emit_methods_with_db_argument: true

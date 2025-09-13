@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"user_service/internal/domain"
 	"user_service/internal/infrastructure/db/sqlc"
+	"user_service/internal/usecase"
 )
 
 type userRepo struct {
@@ -12,7 +13,7 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB, q *sqlc.Queries) *userRepo {
+func NewUserRepo(db *sql.DB, q *sqlc.Queries) usecase.UserRepository {
 	return &userRepo{db: db, q: q}
 }
 

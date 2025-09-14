@@ -51,7 +51,17 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = json.NewEncoder(w).Encode(user)
+	var resp struct {
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+		Role  string `json:"role"`
+		Msg   string `json:"message"`
+	}
+	resp.ID = int(user.ID)
+	resp.Email = user.Email
+	resp.Role = user.Role
+	resp.Msg = "successfully logged in"
+	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		log.Fatal(err)
 	}

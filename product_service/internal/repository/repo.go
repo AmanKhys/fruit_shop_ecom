@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"product_service/internal/domain"
 	"product_service/internal/infrastructure/db/sqlc"
 	"product_service/internal/usecase"
@@ -14,7 +13,7 @@ type productRepo struct {
 	db *sql.DB
 }
 
-func NewProductRepo(q *sqlc.Queries, db *sql.DB) usecase.ProductRepo {
+func NewProductRepo(db *sql.DB, q *sqlc.Queries) usecase.ProductRepo {
 	return &productRepo{q: q, db: db}
 }
 
@@ -25,7 +24,14 @@ func (r *productRepo) GetFilteredProducts(ctx context.Context, min, max float64)
 	}
 	var respProducts = make([]domain.Product, len(products))
 	for _, p := range products {
-		price := p.Price.(float64)
+		var price float64
+		switch p.Price.(type) {
+		case int:
+			val, _ := p.Price.(int)
+			price = float64(val)
+		case float64:
+			price, _ = p.Price.(float64)
+		}
 		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)})
 	}
 	return respProducts, nil
@@ -36,7 +42,14 @@ func (r *productRepo) GetProductByID(ctx context.Context, id int) (domain.Produc
 	if err != nil {
 		return domain.Product{}, err
 	}
-	price := p.Price.(float64)
+	var price float64
+	switch p.Price.(type) {
+	case int:
+		val, _ := p.Price.(int)
+		price = float64(val)
+	case float64:
+		price, _ = p.Price.(float64)
+	}
 	return domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)}, nil
 }
 
@@ -47,7 +60,14 @@ func (r *productRepo) GetAllProducts(ctx context.Context) ([]domain.Product, err
 	}
 	var respProducts = make([]domain.Product, len(products))
 	for _, p := range products {
-		price := p.Price.(float64)
+		var price float64
+		switch p.Price.(type) {
+		case int:
+			val, _ := p.Price.(int)
+			price = float64(val)
+		case float64:
+			price, _ = p.Price.(float64)
+		}
 		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)})
 	}
 	return respProducts, nil
@@ -60,7 +80,14 @@ func (r *productRepo) GetAllProductsForAdmin(ctx context.Context) ([]domain.Prod
 	}
 	var respProducts = make([]domain.Product, len(products))
 	for _, p := range products {
-		price := p.Price.(float64)
+		var price float64
+		switch p.Price.(type) {
+		case int:
+			val, _ := p.Price.(int)
+			price = float64(val)
+		case float64:
+			price, _ = p.Price.(float64)
+		}
 		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock), IsDeleted: p.Isdeleted})
 	}
 	return respProducts, nil
@@ -71,7 +98,14 @@ func (r *productRepo) CreateProduct(ctx context.Context, p domain.Product) (doma
 	if err != nil {
 		return domain.Product{}, err
 	}
-	price := product.Price.(float64)
+	var price float64
+	switch product.Price.(type) {
+	case int:
+		val, _ := product.Price.(int)
+		price = float64(val)
+	case float64:
+		price, _ = product.Price.(float64)
+	}
 	return domain.Product{ID: int(product.ID), Name: product.Name, Price: price, Stock: int(product.Stock)}, nil
 }
 
@@ -82,7 +116,14 @@ func (r *productRepo) UpdateProduct(ctx context.Context, p domain.Product) (doma
 	} else if err != nil {
 		return domain.Product{}, err
 	}
-	price := product.Price.(float64)
+	var price float64
+	switch product.Price.(type) {
+	case int:
+		val, _ := product.Price.(int)
+		price = float64(val)
+	case float64:
+		price, _ = product.Price.(float64)
+	}
 	return domain.Product{ID: int(product.ID), Name: product.Name, Price: price, Stock: int(product.Stock)}, nil
 }
 

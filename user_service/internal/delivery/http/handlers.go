@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"user_service/internal/domain"
 	"user_service/internal/usecase"
@@ -30,7 +31,10 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	msg := fmt.Sprintf("user: %s registered successfully with userID: %d", user.Email, user.ID)
-	w.Write([]byte(msg))
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -47,5 +51,8 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(user)
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

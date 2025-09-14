@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	nethttp "net/http"
 	"os"
-	"user_service/handlers"
 	"user_service/internal/config"
 	"user_service/internal/delivery/http"
 	"user_service/internal/infrastructure/db/sqlc"
@@ -33,7 +32,7 @@ func main() {
 	q := sqlc.New()
 	repo := repository.NewUserRepo(dbConn, q)
 	uc := usecase.NewUserUsecase(repo)
-	handler := handlers.NewUserHandler(uc)
+	handler := http.NewUserHandler(uc)
 
 	// bootstrap admin
 	ctx := context.TODO()
@@ -41,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Info("admin:%s created/exists")
+		log.Info("admin created/exists")
 	}
 	http.RegisterRoutes(handler)
 

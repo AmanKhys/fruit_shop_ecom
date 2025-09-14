@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"product_service/internal/domain"
 	"product_service/internal/infrastructure/db/sqlc"
 	"product_service/internal/usecase"
@@ -52,7 +53,7 @@ func (r *productRepo) GetAllProducts(ctx context.Context) ([]domain.Product, err
 	return respProducts, nil
 }
 
-func (r *productRepo) GetAllProductsForAdmin(ctx context.Context, userID int) ([]domain.Product, error) {
+func (r *productRepo) GetAllProductsForAdmin(ctx context.Context) ([]domain.Product, error) {
 	products, err := r.q.GetProductsForAdmin(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -76,9 +77,15 @@ func (r *productRepo) CreateProduct(ctx context.Context, p domain.Product) (doma
 
 func (r *productRepo) UpdateProduct(ctx context.Context, p domain.Product) (domain.Product, error) {
 	product, err := r.q.UpdateProductByID(ctx, r.db, sqlc.UpdateProductByIDParams{ID: int64(p.ID), Name: p.Name, Price: p.Price, Stock: int64(p.Stock)})
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return domain.Product{}, domain.ErrProductDoesNotExist
+	} else if err != nil {
 		return domain.Product{}, err
 	}
 	price := product.Price.(float64)
 	return domain.Product{ID: int(product.ID), Name: product.Name, Price: price, Stock: int(product.Stock)}, nil
+}
+
+func (r *productRepo) DeleteProductByID(ctx context.Context, id int) error {
+	return r.q.DeleteProductByID(ctx, r.db, int64(id))
 }

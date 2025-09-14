@@ -29,8 +29,8 @@ set name = ?, price = ?, stock = ?
 where id = ?
 returning *;
 
--- name: DeleteProductByID :one
+-- name: DeleteProductByID :exec
 update products
 set isDeleted = true
 where id = ?
-returning *;
+returning isDeleted;

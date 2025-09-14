@@ -10,7 +10,7 @@ import (
 
 type Querier interface {
 	CreateProduct(ctx context.Context, db DBTX, arg CreateProductParams) (Product, error)
-	DeleteProductByID(ctx context.Context, db DBTX, id int64) (Product, error)
+	DeleteProductByID(ctx context.Context, db DBTX, id int64) error
 	GetFilteredProducts(ctx context.Context, db DBTX, arg GetFilteredProductsParams) ([]Product, error)
 	GetProductByID(ctx context.Context, db DBTX, id int64) (Product, error)
 	// go-type: min=float64

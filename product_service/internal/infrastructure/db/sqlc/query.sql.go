@@ -35,24 +35,16 @@ func (q *Queries) CreateProduct(ctx context.Context, db DBTX, arg CreateProductP
 	return i, err
 }
 
-const deleteProductByID = `-- name: DeleteProductByID :one
+const deleteProductByID = `-- name: DeleteProductByID :exec
 update products
 set isDeleted = true
 where id = ?
-returning id, name, price, stock, isdeleted
+returning isDeleted
 `
 
-func (q *Queries) DeleteProductByID(ctx context.Context, db DBTX, id int64) (Product, error) {
-	row := db.QueryRowContext(ctx, deleteProductByID, id)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Price,
-		&i.Stock,
-		&i.Isdeleted,
-	)
-	return i, err
+func (q *Queries) DeleteProductByID(ctx context.Context, db DBTX, id int64) error {
+	_, err := db.ExecContext(ctx, deleteProductByID, id)
+	return err
 }
 
 const getFilteredProducts = `-- name: GetFilteredProducts :many

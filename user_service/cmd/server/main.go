@@ -44,8 +44,9 @@ func main() {
 	}
 	http.RegisterRoutes(handler)
 
-	log.Info("Server running at :8080")
-	err = nethttp.ListenAndServe(os.Getenv(config.ServerStartURL), nil)
+	url := os.Getenv(config.ServerStartURL)
+	log.Info("Server running at " + url)
+	err = nethttp.ListenAndServe(url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

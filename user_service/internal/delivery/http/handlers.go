@@ -47,8 +47,11 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.usecase.Login(r.Context(), reqUser.Email, reqUser.Password)
-	if err != nil {
+	if err == domain.ErrUserDoesNotExist {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var resp struct {

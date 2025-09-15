@@ -32,8 +32,11 @@ func (u *userUsecase) Register(ctx context.Context, email, password string) (dom
 
 func (u *userUsecase) Login(ctx context.Context, email, password string) (domain.User, error) {
 	user, err := u.repo.GetUserByEmail(ctx, email)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.User{}, domain.ErrUserDoesNotExist
+	}
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, domain.ErrInternalErrorFetchingUser
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return domain.User{}, errors.New("invalid credentials")

@@ -24,15 +24,7 @@ func (r *productRepo) GetFilteredProducts(ctx context.Context, min, max float64)
 	}
 	var respProducts []domain.Product
 	for _, p := range products {
-		var price float64
-		switch p.Price.(type) {
-		case int:
-			val, _ := p.Price.(int)
-			price = float64(val)
-		case float64:
-			price, _ = p.Price.(float64)
-		}
-		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)})
+		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: p.Price, Stock: int(p.Stock)})
 	}
 	return respProducts, nil
 }
@@ -42,53 +34,17 @@ func (r *productRepo) GetProductByID(ctx context.Context, id int) (domain.Produc
 	if err != nil {
 		return domain.Product{}, err
 	}
-	var price float64
-	switch p.Price.(type) {
-	case int:
-		val, _ := p.Price.(int)
-		price = float64(val)
-	case float64:
-		price, _ = p.Price.(float64)
-	}
-	return domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)}, nil
+	return domain.Product{ID: int(p.ID), Name: p.Name, Price: p.Price, Stock: int(p.Stock)}, nil
 }
 
-func (r *productRepo) GetAllProducts(ctx context.Context) ([]domain.Product, error) {
-	products, err := r.q.GetProducts(ctx, r.db)
+func (r *productRepo) GetAllProductsForAdmin(ctx context.Context, min, max float64) ([]domain.Product, error) {
+	products, err := r.q.GetProductsForAdmin(ctx, r.db, sqlc.GetProductsForAdminParams{Min: min, Max: max})
 	if err != nil {
 		return nil, err
 	}
-	var respProducts = make([]domain.Product, len(products))
+	var respProducts []domain.Product
 	for _, p := range products {
-		var price float64
-		switch p.Price.(type) {
-		case int:
-			val, _ := p.Price.(int)
-			price = float64(val)
-		case float64:
-			price, _ = p.Price.(float64)
-		}
-		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock)})
-	}
-	return respProducts, nil
-}
-
-func (r *productRepo) GetAllProductsForAdmin(ctx context.Context) ([]domain.Product, error) {
-	products, err := r.q.GetProductsForAdmin(ctx, r.db)
-	if err != nil {
-		return nil, err
-	}
-	var respProducts = make([]domain.Product, len(products))
-	for _, p := range products {
-		var price float64
-		switch p.Price.(type) {
-		case int:
-			val, _ := p.Price.(int)
-			price = float64(val)
-		case float64:
-			price, _ = p.Price.(float64)
-		}
-		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: price, Stock: int(p.Stock), IsDeleted: p.Isdeleted})
+		respProducts = append(respProducts, domain.Product{ID: int(p.ID), Name: p.Name, Price: p.Price, Stock: int(p.Stock), IsDeleted: p.Isdeleted})
 	}
 	return respProducts, nil
 }
@@ -98,33 +54,15 @@ func (r *productRepo) CreateProduct(ctx context.Context, p domain.Product) (doma
 	if err != nil {
 		return domain.Product{}, err
 	}
-	var price float64
-	switch product.Price.(type) {
-	case int:
-		val, _ := product.Price.(int)
-		price = float64(val)
-	case float64:
-		price, _ = product.Price.(float64)
-	}
-	return domain.Product{ID: int(product.ID), Name: product.Name, Price: price, Stock: int(product.Stock)}, nil
+	return domain.Product{ID: int(product.ID), Name: product.Name, Price: p.Price, Stock: int(product.Stock)}, nil
 }
 
 func (r *productRepo) UpdateProduct(ctx context.Context, p domain.Product) (domain.Product, error) {
 	product, err := r.q.UpdateProductByID(ctx, r.db, sqlc.UpdateProductByIDParams{ID: int64(p.ID), Name: p.Name, Price: p.Price, Stock: int64(p.Stock)})
-	if err == sql.ErrNoRows {
-		return domain.Product{}, domain.ErrProductDoesNotExist
-	} else if err != nil {
+	if err != nil {
 		return domain.Product{}, err
 	}
-	var price float64
-	switch product.Price.(type) {
-	case int:
-		val, _ := product.Price.(int)
-		price = float64(val)
-	case float64:
-		price, _ = product.Price.(float64)
-	}
-	return domain.Product{ID: int(product.ID), Name: product.Name, Price: price, Stock: int(product.Stock)}, nil
+	return domain.Product{ID: int(product.ID), Name: product.Name, Price: p.Price, Stock: int(product.Stock)}, nil
 }
 
 func (r *productRepo) DeleteProductByID(ctx context.Context, id int) error {

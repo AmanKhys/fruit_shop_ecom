@@ -9,10 +9,8 @@ import (
 )
 
 type ProductUsecase interface {
-	GetFilteredProducts(ctx context.Context, min, max float64) ([]domain.Product, error)
 	GetProductByID(ctx context.Context, id int) (domain.Product, error)
-	GetAllProducts(ctx context.Context) ([]domain.Product, error)
-	GetAllProductsForAdmin(ctx context.Context) ([]domain.Product, error)
+	GetProducts(ctx context.Context, min, max float64) ([]domain.Product, error)
 	CreateProduct(ctx context.Context, p domain.Product) (domain.Product, error)
 	UpdateProductByID(ctx context.Context, p domain.Product) (domain.Product, error)
 	DeleteProductByID(ctx context.Context, id int) error
@@ -28,12 +26,20 @@ func NewProductUsecase(repo ProductRepo) ProductUsecase {
 }
 
 // a fault tolerant filtering usecase to get filtered products
-func (u *productUsecase) GetFilteredProducts(ctx context.Context, min, max float64) ([]domain.Product, error) {
+func (u *productUsecase) GetProducts(ctx context.Context, min, max float64) ([]domain.Product, error) {
 	if min >= max {
 		min = math.MinInt
 		max = math.MaxInt
 	}
+	role, ok := ctx.Value(domain.RoleKey).(domain.ContextKey)
+	if !ok {
+		return u.repo.GetFilteredProducts(ctx, min, max)
+	}
+	if role == domain.RoleAdmin {
+		return u.repo.GetAllProductsForAdmin(ctx, min, max)
+	}
 	return u.repo.GetFilteredProducts(ctx, min, max)
+
 }
 
 func (u *productUsecase) GetProductByID(ctx context.Context, id int) (domain.Product, error) {
@@ -42,19 +48,6 @@ func (u *productUsecase) GetProductByID(ctx context.Context, id int) (domain.Pro
 		return domain.Product{}, domain.ErrProductDoesNotExist
 	}
 	return p, nil
-}
-
-func (u *productUsecase) GetAllProducts(ctx context.Context) ([]domain.Product, error) {
-	return u.repo.GetAllProducts(ctx)
-}
-
-func (u *productUsecase) GetAllProductsForAdmin(ctx context.Context) ([]domain.Product, error) {
-	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
-
-	if role != domain.RoleAdmin {
-		return nil, domain.ErrUserNotAuthorized
-	}
-	return u.repo.GetAllProductsForAdmin(ctx)
 }
 
 func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (domain.Product, error) {
@@ -72,8 +65,8 @@ func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (d
 }
 
 func (u *productUsecase) UpdateProductByID(ctx context.Context, p domain.Product) (domain.Product, error) {
-	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
-	if role != domain.RoleAdmin {
+	role, ok := ctx.Value(domain.RoleKey).(domain.ContextKey)
+	if !ok || role != domain.RoleAdmin {
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
 
@@ -90,8 +83,8 @@ func (u *productUsecase) UpdateProductByID(ctx context.Context, p domain.Product
 }
 
 func (u *productUsecase) DeleteProductByID(ctx context.Context, id int) error {
-	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
-	if role != domain.RoleAdmin {
+	role, ok := ctx.Value(domain.RoleKey).(domain.ContextKey)
+	if !ok || role != domain.RoleAdmin {
 		return domain.ErrUserDoesNotExist
 	}
 	err := u.repo.DeleteProductByID(ctx, id)

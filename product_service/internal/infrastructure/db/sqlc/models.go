@@ -5,9 +5,9 @@
 package sqlc
 
 type Product struct {
-	ID        int64       `json:"id"`
-	Name      string      `json:"name"`
-	Price     interface{} `json:"price"`
-	Stock     int64       `json:"stock"`
-	Isdeleted bool        `json:"isdeleted"`
+	ID        int64   `json:"id"`
+	Name      string  `json:"name"`
+	Price     float64 `json:"price"`
+	Stock     int64   `json:"stock"`
+	Isdeleted bool    `json:"isdeleted"`
 }

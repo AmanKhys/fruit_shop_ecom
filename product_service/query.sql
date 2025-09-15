@@ -15,7 +15,9 @@ where id = ?
 and isDeleted = false;
 
 -- name: GetProductsForAdmin :many
-select * from products;
+select * from products
+where price >= :min 
+and price <= :max;
 
 -- name: CreateProduct :one
 insert into products

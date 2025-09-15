@@ -18,7 +18,7 @@ func NewProductHandler(u usecase.ProductUsecase) *ProductHandler {
 	return &ProductHandler{u: u}
 }
 
-func (h ProductHandler) GetFilteredProductsHandler(w http.ResponseWriter, r *http.Request) {
+func (h ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	minStr := r.URL.Query().Get("min")
 	maxStr := r.URL.Query().Get("max")
 	var respMsg []string
@@ -31,27 +31,47 @@ func (h ProductHandler) GetFilteredProductsHandler(w http.ResponseWriter, r *htt
 		respMsg = append(respMsg, "max value is not valid")
 	}
 
-	products, err := h.u.GetFilteredProducts(r.Context(), min, max)
+	products, err := h.u.GetProducts(r.Context(), min, max)
 	if err != nil {
 		http.Error(w, "fetching products failed", http.StatusInternalServerError)
 		return
 	}
 
-	var resp struct {
-		Products []dto.ProductUserResponse `json:"products"`
-		Messages []string                  `json:"messages"`
+	role, ok := r.Context().Value(domain.RoleKey).(domain.ContextKey)
+	if !ok || role != domain.RoleAdmin {
+		// give products without isDeleted for normal users
+		var resp struct {
+			Products []dto.ProductUserResponse `json:"products"`
+			Messages []string                  `json:"messages"`
+		}
+		var respProducts []dto.ProductUserResponse
+		for _, p := range products {
+			respProducts = append(respProducts, dto.ProductUserResponse{
+				ID:    p.ID,
+				Name:  p.Name,
+				Price: p.Price,
+				Stock: p.Stock,
+			})
+		}
+		resp.Products = respProducts
+		resp.Messages = respMsg
+		w.Header().Add("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
 	}
-	var respProducts []dto.ProductUserResponse
-	for _, p := range products {
-		respProducts = append(respProducts, dto.ProductUserResponse{
-			ID:    p.ID,
-			Name:  p.Name,
-			Price: p.Price,
-			Stock: p.Stock,
-		})
+
+	// give response with isDeleted field for admin
+	resp := struct {
+		Products []domain.Product `json:"products"`
+		Messages []string         `json:"messages"`
+	}{
+		Products: products,
+		Messages: respMsg,
 	}
-	resp.Products = respProducts
-	resp.Messages = respMsg
+	w.Header().Add("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		log.Fatal(err)
@@ -70,24 +90,8 @@ func (h ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, domain.ErrProductDoesNotExistResponse, http.StatusBadRequest)
 		return
 	}
+	w.Header().Add("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (h ProductHandler) GetAllProductsForAdmin(w http.ResponseWriter, r *http.Request) {
-	products, err := h.u.GetAllProductsForAdmin(r.Context())
-	if err == domain.ErrUserNotAuthorized {
-		http.Error(w, domain.ErrUserNotAuthorized.Error(), http.StatusForbidden)
-		return
-	}
-	if err != nil {
-		http.Error(w, domain.ErrProductsFetchingFailed, http.StatusInternalServerError)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(products)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,6 +115,7 @@ func (h ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.Msg = "product successfully created"
 	resp.Product = p
+	w.Header().Add("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		log.Fatal(err)
@@ -142,8 +147,9 @@ func (h ProductHandler) UpdateProductByID(w http.ResponseWriter, r *http.Request
 		Msg     string         `json:"message"`
 		Product domain.Product `json:"product"`
 	}
-	resp.Msg = "product successfully created"
+	resp.Msg = "product successfully updated"
 	resp.Product = p
+	w.Header().Add("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		log.Fatal(err)

@@ -17,9 +17,9 @@ returning id, name, price, stock, isdeleted
 `
 
 type CreateProductParams struct {
-	Name  string      `json:"name"`
-	Price interface{} `json:"price"`
-	Stock int64       `json:"stock"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+	Stock int64   `json:"stock"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, db DBTX, arg CreateProductParams) (Product, error) {
@@ -55,8 +55,8 @@ and isDeleted = false
 `
 
 type GetFilteredProductsParams struct {
-	Min interface{} `json:"min"`
-	Max interface{} `json:"max"`
+	Min float64 `json:"min"`
+	Max float64 `json:"max"`
 }
 
 func (q *Queries) GetFilteredProducts(ctx context.Context, db DBTX, arg GetFilteredProductsParams) ([]Product, error) {
@@ -145,10 +145,17 @@ func (q *Queries) GetProducts(ctx context.Context, db DBTX) ([]Product, error) {
 
 const getProductsForAdmin = `-- name: GetProductsForAdmin :many
 select id, name, price, stock, isdeleted from products
+where price >= ?1 
+and price <= ?2
 `
 
-func (q *Queries) GetProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error) {
-	rows, err := db.QueryContext(ctx, getProductsForAdmin)
+type GetProductsForAdminParams struct {
+	Min float64 `json:"min"`
+	Max float64 `json:"max"`
+}
+
+func (q *Queries) GetProductsForAdmin(ctx context.Context, db DBTX, arg GetProductsForAdminParams) ([]Product, error) {
+	rows, err := db.QueryContext(ctx, getProductsForAdmin, arg.Min, arg.Max)
 	if err != nil {
 		return nil, err
 	}
@@ -184,10 +191,10 @@ returning id, name, price, stock, isdeleted
 `
 
 type UpdateProductByIDParams struct {
-	Name  string      `json:"name"`
-	Price interface{} `json:"price"`
-	Stock int64       `json:"stock"`
-	ID    int64       `json:"id"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+	Stock int64   `json:"stock"`
+	ID    int64   `json:"id"`
 }
 
 func (q *Queries) UpdateProductByID(ctx context.Context, db DBTX, arg UpdateProductByIDParams) (Product, error) {

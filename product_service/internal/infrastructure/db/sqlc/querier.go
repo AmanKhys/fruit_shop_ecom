@@ -16,7 +16,7 @@ type Querier interface {
 	// go-type: min=float64
 	// go-type: max=float64
 	GetProducts(ctx context.Context, db DBTX) ([]Product, error)
-	GetProductsForAdmin(ctx context.Context, db DBTX) ([]Product, error)
+	GetProductsForAdmin(ctx context.Context, db DBTX, arg GetProductsForAdminParams) ([]Product, error)
 	UpdateProductByID(ctx context.Context, db DBTX, arg UpdateProductByIDParams) (Product, error)
 }
 

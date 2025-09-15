@@ -1,12 +1,18 @@
 package http
 
 import (
+	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"product_service/internal/domain"
 )
 
 func RegisterRoutes(h *ProductHandler) {
-	Auth := AuthMiddleware([]byte(domain.AuthSecret))
+	authSecret := os.Getenv(domain.AuthSecret)
+	if authSecret == "" {
+		log.Fatal("jwt Secret not in env")
+	}
+	Auth := AuthMiddleware([]byte(authSecret))
 
 	http.HandleFunc("GET /products", h.GetFilteredProductsHandler)
 	http.HandleFunc("GET /admin/products", h.GetAllProductsForAdmin)

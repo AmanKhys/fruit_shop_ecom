@@ -5,10 +5,7 @@ import "errors"
 var (
 	ID = "id"
 	// authentication key
-	AuthSecret = "AUTH_SECRET"
-
-	RoleAdmin = "admin"
-	RoleUser  = "user"
+	AuthSecret = "JWT_SECRET"
 
 	// internal errors
 	ErrUserDoesNotExist    = errors.New("user does not exist")
@@ -33,4 +30,6 @@ var (
 	// request context and query keys
 	UserIDKey ContextKey = "userId"
 	RoleKey   ContextKey = "role"
+	RoleAdmin ContextKey = "admin"
+	RoleUser  ContextKey = "user"
 )

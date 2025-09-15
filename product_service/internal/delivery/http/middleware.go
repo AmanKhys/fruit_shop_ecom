@@ -10,7 +10,7 @@ import (
 )
 
 type Claims struct {
-	UserID string `json:"userId"`
+	UserID int    `json:"user_id"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -38,7 +38,7 @@ func AuthMiddleware(secret []byte) func(http.HandlerFunc) http.Handler {
 
 			// attach user info to context
 			ctx := context.WithValue(r.Context(), domain.UserIDKey, claims.UserID)
-			ctx = context.WithValue(ctx, domain.RoleKey, claims.Role)
+			ctx = context.WithValue(ctx, domain.RoleKey, domain.ContextKey(claims.Role))
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"math"
 	"product_service/internal/domain"
 )
@@ -50,7 +49,7 @@ func (u *productUsecase) GetAllProducts(ctx context.Context) ([]domain.Product, 
 }
 
 func (u *productUsecase) GetAllProductsForAdmin(ctx context.Context) ([]domain.Product, error) {
-	role := ctx.Value("role").(string)
+	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
 
 	if role != domain.RoleAdmin {
 		return nil, domain.ErrUserNotAuthorized
@@ -59,7 +58,7 @@ func (u *productUsecase) GetAllProductsForAdmin(ctx context.Context) ([]domain.P
 }
 
 func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (domain.Product, error) {
-	role := ctx.Value("role").(string)
+	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
 	if role != domain.RoleAdmin {
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
@@ -73,7 +72,7 @@ func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (d
 }
 
 func (u *productUsecase) UpdateProductByID(ctx context.Context, p domain.Product) (domain.Product, error) {
-	role := ctx.Value("role").(string)
+	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
 	if role != domain.RoleAdmin {
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
@@ -91,7 +90,7 @@ func (u *productUsecase) UpdateProductByID(ctx context.Context, p domain.Product
 }
 
 func (u *productUsecase) DeleteProductByID(ctx context.Context, id int) error {
-	role := ctx.Value("role").(string)
+	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
 	if role != domain.RoleAdmin {
 		return domain.ErrUserDoesNotExist
 	}

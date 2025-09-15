@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"product_service/internal/domain"
@@ -168,10 +167,4 @@ func (h ProductHandler) DeleteProductByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-	msg := fmt.Sprintf("successfully deleted product with id:%d", id)
-	_, err = w.Write([]byte(msg))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 }

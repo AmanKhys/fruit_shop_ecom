@@ -1,19 +1,18 @@
-package usecase
+package domain
 
 import (
 	"errors"
 	"regexp"
-	"user_service/internal/domain"
 )
 
-func ValidateUser(u domain.User) error {
+func ValidateUser(u User) error {
 	emailValidator := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	var errs []error
 	if len(u.Password) < 6 {
-		errs = append(errs, domain.ErrPasswordTooShort)
+		errs = append(errs, ErrInvalidPassword)
 	}
 	if !emailValidator.MatchString(u.Email) {
-		errs = append(errs, domain.ErrInvalidEmail)
+		errs = append(errs, ErrInvalidEmail)
 	}
 	if len(errs) > 0 {
 		return errors.Join(errs...)

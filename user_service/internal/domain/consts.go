@@ -8,8 +8,9 @@ var (
 	ErrInternalErrorFetchingUser = errors.New("internal error fetching user")
 	ErrRegisteringUser           = errors.New("error registering user")
 
-	ErrPasswordTooShort = errors.New("password too short")
-	ErrInvalidEmail     = errors.New("invalid email")
+	ErrInvalidPassword    = errors.New("password too short")
+	ErrInvalidEmail       = errors.New("invalid email")
+	ErrInvalidCredentials = errors.New("invalid credentials")
 
 	JwtSecret = "JWT_SECRET"
 )

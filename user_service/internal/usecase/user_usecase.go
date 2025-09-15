@@ -23,7 +23,7 @@ func NewUserUsecase(repo UserRepository) UserUsecase {
 }
 
 func (u *userUsecase) Register(ctx context.Context, email, password string) (domain.User, error) {
-	if err := ValidateUser(domain.User{Email: email, Password: password}); err != nil {
+	if err := domain.ValidateUser(domain.User{Email: email, Password: password}); err != nil {
 		return domain.User{}, err
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -43,7 +43,7 @@ func (u *userUsecase) Register(ctx context.Context, email, password string) (dom
 }
 
 func (u *userUsecase) Login(ctx context.Context, email, password string) (domain.User, error) {
-	if err := ValidateUser(domain.User{Email: email, Password: password}); err != nil {
+	if err := domain.ValidateUser(domain.User{Email: email, Password: password}); err != nil {
 		return domain.User{}, err
 	}
 	user, err := u.repo.GetUserByEmail(ctx, email)
@@ -54,12 +54,15 @@ func (u *userUsecase) Login(ctx context.Context, email, password string) (domain
 		return domain.User{}, domain.ErrInternalErrorFetchingUser
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return domain.User{}, errors.New("invalid credentials")
+		return domain.User{}, domain.ErrInvalidCredentials
 	}
 	return user, nil
 }
 
 func (u *userUsecase) EnsureAdminExists(ctx context.Context, email, password string) (domain.User, error) {
+	if err := domain.ValidateUser(domain.User{Email: email, Password: password}); err != nil {
+		return domain.User{}, err
+	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return domain.User{}, err

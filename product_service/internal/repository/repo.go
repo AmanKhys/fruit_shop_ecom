@@ -22,7 +22,7 @@ func (r *productRepo) GetFilteredProducts(ctx context.Context, min, max float64)
 	if err != nil {
 		return nil, err
 	}
-	var respProducts = make([]domain.Product, len(products))
+	var respProducts []domain.Product
 	for _, p := range products {
 		var price float64
 		switch p.Price.(type) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"math"
 	"product_service/internal/domain"
 )
@@ -63,6 +64,10 @@ func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (d
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
 
+	if err := ValidateProduct(p); err != nil {
+		return domain.Product{}, err
+	}
+
 	return u.repo.CreateProduct(ctx, domain.Product{Name: p.Name, Price: p.Price, Stock: p.Stock})
 
 }
@@ -73,7 +78,12 @@ func (u *productUsecase) UpdateProductByID(ctx context.Context, p domain.Product
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
 
+	if err := ValidateProduct(p); err != nil {
+		return domain.Product{}, err
+	}
+
 	p, err := u.repo.UpdateProduct(ctx, domain.Product{ID: p.ID, Name: p.Name, Price: p.Price, Stock: p.Stock})
+
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Product{}, domain.ErrProductDoesNotExist
 	}

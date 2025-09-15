@@ -20,6 +20,11 @@ var (
 	ErrProductFetchingFailed       = "fetching product failed"
 	ErrProductsFetchingFailed      = "fetching products failed"
 	ErrPoorlyFormedRequest         = "request doesn't contain all the necessary data"
+
+	// admin product modification errors
+	ErrPriceInvalid = errors.New("invalid price amount")
+	ErrStockInvalid = errors.New("invalid stock amount")
+	ErrNameInvalid  = errors.New("invalid name")
 )
 
 type ContextKey string

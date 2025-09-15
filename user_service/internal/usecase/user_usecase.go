@@ -23,14 +23,29 @@ func NewUserUsecase(repo UserRepository) UserUsecase {
 }
 
 func (u *userUsecase) Register(ctx context.Context, email, password string) (domain.User, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
+	if err := ValidateUser(domain.User{Email: email, Password: password}); err != nil {
 		return domain.User{}, err
 	}
-	return u.repo.CreateUser(ctx, domain.User{Email: email, Password: string(hashedPassword)})
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return domain.User{}, domain.ErrRegisteringUser
+	}
+	_, err = u.repo.GetUserByEmail(ctx, email)
+	if err == nil {
+		return domain.User{}, domain.ErrUserAlreadyExist
+	}
+
+	user, err := u.repo.CreateUser(ctx, domain.User{Email: email, Password: string(hashedPassword)})
+	if err != nil {
+		return domain.User{}, domain.ErrInternalErrorFetchingUser
+	}
+	return user, nil
 }
 
 func (u *userUsecase) Login(ctx context.Context, email, password string) (domain.User, error) {
+	if err := ValidateUser(domain.User{Email: email, Password: password}); err != nil {
+		return domain.User{}, err
+	}
 	user, err := u.repo.GetUserByEmail(ctx, email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.User{}, domain.ErrUserDoesNotExist

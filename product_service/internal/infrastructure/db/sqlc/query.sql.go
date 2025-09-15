@@ -107,6 +107,24 @@ func (q *Queries) GetProductByID(ctx context.Context, db DBTX, id int64) (Produc
 	return i, err
 }
 
+const getProductByIDForAdmin = `-- name: GetProductByIDForAdmin :one
+select id, name, price, stock, isdeleted from products
+where id = ?
+`
+
+func (q *Queries) GetProductByIDForAdmin(ctx context.Context, db DBTX, id int64) (Product, error) {
+	row := db.QueryRowContext(ctx, getProductByIDForAdmin, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.Stock,
+		&i.Isdeleted,
+	)
+	return i, err
+}
+
 const getProducts = `-- name: GetProducts :many
 select id, name, price, stock, isdeleted from products
 where isDeleted = false

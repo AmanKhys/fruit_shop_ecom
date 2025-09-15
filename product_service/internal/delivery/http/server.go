@@ -15,8 +15,8 @@ func RegisterRoutes(h *ProductHandler) {
 	Auth := AuthMiddleware([]byte(authSecret))
 
 	http.Handle("GET /products", Auth(h.GetProducts))
-	http.HandleFunc("GET /product", h.GetProductByID)
+	http.Handle("GET /product", Auth(h.GetProductByID))
 	http.Handle("POST /product/create", Auth(h.CreateProduct))
-	http.Handle("POST /product/update", Auth(h.UpdateProductByID))
+	http.Handle("PUT /product/update", Auth(h.UpdateProductByID))
 	http.Handle("DELETE /product", Auth(h.DeleteProductByID))
 }

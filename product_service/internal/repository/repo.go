@@ -37,6 +37,14 @@ func (r *productRepo) GetProductByID(ctx context.Context, id int) (domain.Produc
 	return domain.Product{ID: int(p.ID), Name: p.Name, Price: p.Price, Stock: int(p.Stock)}, nil
 }
 
+func (r *productRepo) GetProductByIDForAdmin(ctx context.Context, id int) (domain.Product, error) {
+	p, err := r.q.GetProductByIDForAdmin(ctx, r.db, int64(id))
+	if err != nil {
+		return domain.Product{}, err
+	}
+	return domain.Product{ID: int(p.ID), Name: p.Name, Price: p.Price, Stock: int(p.Stock), IsDeleted: p.Isdeleted}, nil
+}
+
 func (r *productRepo) GetAllProductsForAdmin(ctx context.Context, min, max float64) ([]domain.Product, error) {
 	products, err := r.q.GetProductsForAdmin(ctx, r.db, sqlc.GetProductsForAdminParams{Min: min, Max: max})
 	if err != nil {

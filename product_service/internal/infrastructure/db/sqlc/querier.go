@@ -13,6 +13,7 @@ type Querier interface {
 	DeleteProductByID(ctx context.Context, db DBTX, id int64) error
 	GetFilteredProducts(ctx context.Context, db DBTX, arg GetFilteredProductsParams) ([]Product, error)
 	GetProductByID(ctx context.Context, db DBTX, id int64) (Product, error)
+	GetProductByIDForAdmin(ctx context.Context, db DBTX, id int64) (Product, error)
 	// go-type: min=float64
 	// go-type: max=float64
 	GetProducts(ctx context.Context, db DBTX) ([]Product, error)

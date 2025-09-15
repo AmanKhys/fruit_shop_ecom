@@ -43,7 +43,15 @@ func (u *productUsecase) GetProducts(ctx context.Context, min, max float64) ([]d
 }
 
 func (u *productUsecase) GetProductByID(ctx context.Context, id int) (domain.Product, error) {
-	p, err := u.repo.GetProductByID(ctx, id)
+	role, ok := ctx.Value(domain.RoleKey).(domain.ContextKey)
+	if !ok || role != domain.RoleAdmin {
+		p, err := u.repo.GetProductByID(ctx, id)
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Product{}, domain.ErrProductDoesNotExist
+		}
+		return p, nil
+	}
+	p, err := u.repo.GetProductByIDForAdmin(ctx, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Product{}, domain.ErrProductDoesNotExist
 	}
@@ -51,8 +59,8 @@ func (u *productUsecase) GetProductByID(ctx context.Context, id int) (domain.Pro
 }
 
 func (u *productUsecase) CreateProduct(ctx context.Context, p domain.Product) (domain.Product, error) {
-	role := ctx.Value(domain.RoleKey).(domain.ContextKey)
-	if role != domain.RoleAdmin {
+	role, ok := ctx.Value(domain.RoleKey).(domain.ContextKey)
+	if !ok || role != domain.RoleAdmin {
 		return domain.Product{}, domain.ErrUserNotAuthorized
 	}
 

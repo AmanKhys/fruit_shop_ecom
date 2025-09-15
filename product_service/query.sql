@@ -14,6 +14,10 @@ select * from products
 where id = ?
 and isDeleted = false;
 
+-- name: GetProductByIDForAdmin :one
+select * from products
+where id = ?;
+
 -- name: GetProductsForAdmin :many
 select * from products
 where price >= :min 
